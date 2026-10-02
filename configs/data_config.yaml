@@ -1,0 +1,23 @@
+# Data Pipeline Configuration
+
+dataset:
+  # HuggingFace repository or local path
+  hf_repo: "Yunij/kaggle-comp-daigt"
+  cache_dir: "data/raw"
+  output_dir: "data/processed"
+  
+preprocessing:
+  min_words: 80
+  max_words: 2500
+  remove_duplicates: true
+  split_by_prompt: false  # If true, completely isolates unseen prompts into test set
+  test_size: 0.15
+  val_size: 0.10
+  random_state: 42
+
+dpo:
+  max_length_ratio_diff: 0.35
+  pairs_per_prompt: 1500
+  system_prompt: "You are an insightful, authentic essay writer. You write with expressive, varied sentence structures and avoid predictable AI cliches or repetitive transition markers."
+  output_train: "data/processed/dpo_train.jsonl"
+  output_val: "data/processed/dpo_val.jsonl"

@@ -1,0 +1,22 @@
+# Detector (Discriminator) Configuration
+
+model:
+  name: "microsoft/deberta-v3-base"
+  max_length: 512
+
+training:
+  output_dir: "checkpoints/detector"
+  batch_size: 8
+  gradient_accumulation_steps: 2
+  learning_rate: 2.0e-5
+  num_epochs: 3
+  weight_decay: 0.01
+  fp16: true
+  save_best_model: true
+
+data:
+  train_path: "data/processed/train.parquet"
+  val_path: "data/processed/val.parquet"
+  test_path: "data/processed/test.parquet"
+  max_train_samples: null
+  max_val_samples: null

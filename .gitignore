@@ -216,3 +216,14 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Project specific
+data/
+checkpoints/
+models/
+outputs/
+*.pt
+*.bin
+*.safetensors
+*.parquet
+
