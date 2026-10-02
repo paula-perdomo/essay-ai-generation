@@ -68,7 +68,9 @@ class DetectorTrainer:
         self.learning_rate = learning_rate
         self.num_epochs = num_epochs
         self.weight_decay = weight_decay
-        self.fp16 = fp16 and torch.cuda.is_available()
+        self.bf16 = torch.cuda.is_available() and torch.cuda.is_bf16_supported()
+        # DeBERTa-v3 has a known incompatibility with PyTorch FP16 GradScaler; use BF16 on modern GPUs
+        self.fp16 = False if self.bf16 else (fp16 and torch.cuda.is_available())
 
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         self.model = AutoModelForSequenceClassification.from_pretrained(
@@ -80,7 +82,11 @@ class DetectorTrainer:
 
     def prepare_dataset(self, df: pd.DataFrame) -> Dataset:
         """Tokenize dataframe and format as Hugging Face Dataset."""
-        ds = Dataset.from_pandas(df[["text", "label"]])
+        prepared_df = pd.DataFrame({
+            "text": df["text"].tolist(),
+            "labels": df["label"].astype(int).tolist(),
+        })
+        ds = Dataset.from_pandas(prepared_df)
 
         def tokenize_batch(batch):
             return self.tokenizer(
@@ -115,6 +121,7 @@ class DetectorTrainer:
             gradient_accumulation_steps=self.gradient_accumulation_steps,
             num_train_epochs=self.num_epochs,
             weight_decay=self.weight_decay,
+            bf16=self.bf16,
             fp16=self.fp16,
             load_best_model_at_end=save_best_model,
             metric_for_best_model="roc_auc",
